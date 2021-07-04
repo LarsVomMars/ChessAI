@@ -1,0 +1,2 @@
+#!/bin/env sh
+php -S localhost:6500

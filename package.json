@@ -1,0 +1,11 @@
+{
+  "name": "chessAI",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "LarsVomMars <developer@kroenner.eu>",
+  "license": "MIT",
+  "dependencies": {
+    "chess.js": "^0.12.0",
+    "cm-chessboard": "^3.12.14"
+  }
+}
