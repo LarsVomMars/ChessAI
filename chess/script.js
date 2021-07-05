@@ -1,16 +1,24 @@
+import negamax from "./ai/negamax.js";
+import evaluateSquareTable, { countMaterial } from "./ai/pieces.js";
 import {
     INPUT_EVENT_TYPE,
     COLOR,
     Chessboard,
     MARKER_TYPE,
-} from "cm-chessboard/src/cm-chessboard/Chessboard";
+} from "./node_modules/cm-chessboard/src/cm-chessboard/Chessboard.js";
 
 const chess = new Chess(
-    "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+    // "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+    "7k/3PP3/8/8/8/8/1pp3K1/8 w - - 0 1"
 );
 
 function inputHandler(event) {
     console.log("event", event);
+    // console.log(chess.board().flat())
+    const b = chess.board().flat();
+    console.log(countMaterial(b, "w"));
+    console.log(countMaterial(b, "b"));
+    console.log(negamax(chess));
     // event.chessboard.removeMarkers(undefined, MARKER_TYPE.dot);
     if (event.type === INPUT_EVENT_TYPE.moveStart) {
         const moves = chess.moves({ square: event.square, verbose: true });
@@ -41,7 +49,7 @@ function inputHandler(event) {
             }
         }
         event.chessboard.removeMarkers(undefined, MARKER_TYPE.dot);
-        console.log(evaluate(chess.board().flat()));
+        // console.log(evaluate(chess.board().flat()));
         return result;
     } else if (event.type === INPUT_EVENT_TYPE.moveCanceled) {
         event.chessboard.removeMarkers(undefined, MARKER_TYPE.dot);
@@ -62,3 +70,6 @@ board.enableMoveInput(inputHandler, COLOR.white);
 function random(arr) {
     return arr[Math.floor(Math.random() * arr.length)];
 }
+
+console.log(evaluateSquareTable("P", "e4", false));
+console.log(evaluateSquareTable("p", "e4", false));
