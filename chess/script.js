@@ -1,5 +1,7 @@
+import { endgameWeight } from "./ai/evaluate.js";
+import { random } from "./ai/util.js";
 import negamax from "./ai/negamax.js";
-import evaluateSquareTable, { countMaterial } from "./ai/pieces.js";
+import evaluateSquareTable, { countCentipawnMaterial as countMaterial, countMaterialType } from "./ai/pieces.js";
 import {
     INPUT_EVENT_TYPE,
     COLOR,
@@ -10,17 +12,12 @@ import {
 const chess = new Chess(
     // "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
     "7k/3PP3/8/8/8/8/1pp3K1/8 w - - 0 1"
+    // "8/3PP2k/4K3/5r2/8/8/2p5/8 w - - 8 6"
 );
 
 function inputHandler(event) {
-    console.log("event", event);
-    // console.log(chess.board().flat())
-    const b = chess.board().flat();
-    console.log(countMaterial(b, "w"));
-    console.log(countMaterial(b, "b"));
-    console.log(negamax(chess));
-    // event.chessboard.removeMarkers(undefined, MARKER_TYPE.dot);
     if (event.type === INPUT_EVENT_TYPE.moveStart) {
+        console.log(negamax(chess, 3));
         const moves = chess.moves({ square: event.square, verbose: true });
         console.log(moves);
         for (const move of moves) {
@@ -66,10 +63,3 @@ const board = new Chessboard(document.getElementById("board"), {
     orientation: COLOR.white,
 });
 board.enableMoveInput(inputHandler, COLOR.white);
-
-function random(arr) {
-    return arr[Math.floor(Math.random() * arr.length)];
-}
-
-console.log(evaluateSquareTable("P", "e4", false));
-console.log(evaluateSquareTable("p", "e4", false));

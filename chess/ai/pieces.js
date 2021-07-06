@@ -1,19 +1,44 @@
-export default function evaluateSquareTable(piece, position, endgame = false) {
-    const file = parseInt(position[0], 18) - 10;
-    let pos = (+position[1]) * 8 - file;
-    if (isWhite(piece)) pos = 64 - pos;
-    return TableMap[asBlack(piece)][pos];
+export default function evaluateSquareTable(board, color, endgame) {
+    const pieces = [];
+    for (let i = 0; i < board.length; i++) {
+        const field = board[i];
+        if (field && field.color === color) pieces.push([field, i]);
+    }
+    let value = 0;
+    for (const piece of pieces) {
+        // if (piece.type === Pieces.KING)
+        // value += Math.floor(
+        //     evaluateSquareTablePiece(piece[0], piece[1]) * (1 - endgame)
+        // );
+        value += evaluateSquareTablePiece(piece[0], piece[1]);
+    }
+    return value;
 }
 
-export function countMaterial(board, color) {
-    return board.filter((p) => p !== null && p.color === color).map((p) => PieceValues[p.type]).reduce((p, c) => p + c);
+export function evaluateSquareTablePiece(piece, position) {
+    if (isWhite(piece)) position = 64 - position;
+    return TableMap[piece.type][position];
 }
 
-export const asBlack = (piece) => piece.toLowerCase();
-export const asWhite = (piece) => piece.toUpperCase();
-export const isWhite = (piece) => piece[0].toUpperCase() === piece[0];
+export const getColorPieces = (board, color) =>
+    board.filter((p, i) => p !== null && p.color === color);
 
-export const Pieces = { // Scuffed enum
+export const countMaterialType = (board, color, type) => {
+    const filter = board
+        .filter((p) => p !== null && p.color === color && p.type === type)
+        .map((p) => PieceValues[p.type]);
+    return filter.length === 0 ? 0 : filter.reduce((acc, val) => acc + val);
+};
+
+export const countCentipawnMaterial = (board, color) => {
+    const filter = getColorPieces(board).map((p) => PieceValues[p.type]);
+    return filter.length === 0 ? 0 : filter.reduce((acc, val) => acc + val);
+};
+
+export const isWhite = (type) => type === "w";
+
+// Scuffed enum
+export const Pieces = {
     PAWN: "p",
     KNIGHT: "n",
     BISHOP: "b",
@@ -23,14 +48,15 @@ export const Pieces = { // Scuffed enum
 };
 
 export const PieceValues = {
-    "p": 100,
-    "n": 320,
-    "b": 330,
-    "r": 500,
-    "q": 900,
-    "k": 20000,
+    p: 100,
+    n: 320,
+    b: 330,
+    r: 500,
+    q: 900,
+    k: 20000,
 };
 
+// prettier-ignore
 export const PAWN_TABLE = [
      0,  0,  0,  0,  0,  0,  0,  0,
     50, 50, 50, 50, 50, 50, 50, 50,
@@ -42,6 +68,7 @@ export const PAWN_TABLE = [
      0,  0,  0,  0,  0,  0,  0,  0
 ];
 
+// prettier-ignore
 export const KNIGHT_TABLE = [
     -50,-40,-30,-30,-30,-30,-40,-50,
     -40,-20,  0,  0,  0,  0,-20,-40,
@@ -53,6 +80,7 @@ export const KNIGHT_TABLE = [
     -50,-40,-30,-30,-30,-30,-40,-50,
 ];
 
+// prettier-ignore
 export const BISHOP_TABLE = [
     -20,-10,-10,-10,-10,-10,-10,-20,
     -10,  0,  0,  0,  0,  0,  0,-10,
@@ -64,6 +92,7 @@ export const BISHOP_TABLE = [
     -20,-10,-10,-10,-10,-10,-10,-20,
 ];
 
+// prettier-ignore
 export const ROOK_TABLE = [
     0,  0,  0,  0,  0,  0,  0,  0,
     5, 10, 10, 10, 10, 10, 10,  5,
@@ -75,6 +104,7 @@ export const ROOK_TABLE = [
     0,  0,  0,  5,  5,  0,  0,  0,
 ];
 
+// prettier-ignore
 export const QUEEN_TABLE = [
     -20,-10,-10, -5, -5,-10,-10,-20,
     -10,  0,  0,  0,  0,  0,  0,-10,
@@ -86,6 +116,7 @@ export const QUEEN_TABLE = [
     -20,-10,-10, -5, -5,-10,-10,-20,
 ];
 
+// prettier-ignore
 export const KING_TABLE = [
     -30,-40,-40,-50,-50,-40,-40,-30,
     -30,-40,-40,-50,-50,-40,-40,-30,
@@ -97,6 +128,7 @@ export const KING_TABLE = [
      20, 30, 10,  0,  0, 10, 30, 20,
 ];
 
+// prettier-ignore
 export const KING_ENDGAME_TABLE = [
     -50,-40,-30,-20,-20,-30,-40,-50,
     -30,-20,-10,  0,  0,-10,-20,-30,
@@ -108,13 +140,15 @@ export const KING_ENDGAME_TABLE = [
     -50,-30,-30,-30,-30,-30,-30,-50,
 ];
 
-
 export const TableMap = {
-    "p": PAWN_TABLE,
-    "n": KNIGHT_TABLE,
-    "b": KNIGHT_TABLE,
-    "r": ROOK_TABLE,
-    "q": QUEEN_TABLE,
-    "k": KING_TABLE,
-    "ke": KING_ENDGAME_TABLE,
+    p: PAWN_TABLE,
+    n: KNIGHT_TABLE,
+    b: KNIGHT_TABLE,
+    r: ROOK_TABLE,
+    q: QUEEN_TABLE,
+    k: KING_TABLE,
+    ke: KING_ENDGAME_TABLE,
 };
+
+export const ENDGAME_THRESHHOLD =
+    PieceValues.r * 2 + PieceValues.b + PieceValues.n;
