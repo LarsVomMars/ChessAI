@@ -1,0 +1,10 @@
+{
+  "name": "presentation",
+  "version": "1.0.0",
+  "license": "MIT",
+  "dependencies": {
+    "highlight.js": "^11.0.1",
+    "mathjax": "^3.2.0",
+    "reveal.js": "^4.1.3"
+  }
+}
