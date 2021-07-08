@@ -1,7 +1,5 @@
-import { endgameWeight } from "./ai/evaluate.js";
 import { random } from "./ai/util.js";
 import negamax from "./ai/negamax.js";
-import evaluateSquareTable, { countCentipawnMaterial as countMaterial, countMaterialType } from "./ai/pieces.js";
 import {
     INPUT_EVENT_TYPE,
     COLOR,
@@ -11,18 +9,19 @@ import {
 
 const chess = new Chess(
     // "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
-    "7k/3PP3/8/8/8/8/1pp3K1/8 w - - 0 1"
+    // "7k/3PP3/8/8/8/8/1pp3K1/8 w - - 0 1"
     // "8/3PP2k/4K3/5r2/8/8/2p5/8 w - - 8 6"
+    // "3Q4/4P1k1/8/8/8/8/1pp3K1/8 w - - 1 2"
+    // "3QQ3/6k1/8/8/8/8/1p4K1/2b5 w - - 0 3"
+    "3QQ3/6k1/8/8/8/8/1p4K1/2n5 w - - 0 3"
+    // "3Q2Q1/6k1/8/8/8/8/1p4K1/2n5 b - - 1 3"
 );
 
 function inputHandler(event) {
     if (event.type === INPUT_EVENT_TYPE.moveStart) {
-        console.log(negamax(chess, 3));
         const moves = chess.moves({ square: event.square, verbose: true });
-        console.log(moves);
-        for (const move of moves) {
+        for (const move of moves)
             event.chessboard.addMarker(move.to, MARKER_TYPE.dot);
-        }
         return moves.length > 0;
     } else if (event.type === INPUT_EVENT_TYPE.moveDone) {
         const move = { from: event.squareFrom, to: event.squareTo };
@@ -38,7 +37,6 @@ function inputHandler(event) {
             // Random moves
             if (moves.length > 0) {
                 const move = random(moves);
-                console.log(move);
                 chess.move(move);
                 event.chessboard.enableMoveInput(inputHandler, COLOR.white);
                 event.chessboard.setPosition(chess.fen());
@@ -46,7 +44,7 @@ function inputHandler(event) {
             }
         }
         event.chessboard.removeMarkers(undefined, MARKER_TYPE.dot);
-        // console.log(evaluate(chess.board().flat()));
+        console.log(negamax(chess, 3));
         return result;
     } else if (event.type === INPUT_EVENT_TYPE.moveCanceled) {
         event.chessboard.removeMarkers(undefined, MARKER_TYPE.dot);
@@ -62,4 +60,7 @@ const board = new Chessboard(document.getElementById("board"), {
     style: { moveMarker: MARKER_TYPE.square, hoverMarker: undefined },
     orientation: COLOR.white,
 });
+
 board.enableMoveInput(inputHandler, COLOR.white);
+
+setTimeout(() => console.log(negamax(chess, 3)), 500);

@@ -6,10 +6,10 @@ export default function evaluateSquareTable(board, color, endgame) {
     }
     let value = 0;
     for (const piece of pieces) {
-        // if (piece.type === Pieces.KING)
-        // value += Math.floor(
-        //     evaluateSquareTablePiece(piece[0], piece[1]) * (1 - endgame)
-        // );
+        if (piece.type === Pieces.KING)
+            value += Math.floor(
+                evaluateSquareTablePiece(piece[0], piece[1]) * (1 - endgame)
+            );
         value += evaluateSquareTablePiece(piece[0], piece[1]);
     }
     return value;
@@ -37,7 +37,7 @@ export const countCentipawnMaterial = (board, color) => {
 
 export const isWhite = (type) => type === "w";
 
-// Scuffed enum
+// Scuffed enums
 export const Pieces = {
     PAWN: "p",
     KNIGHT: "n",
@@ -45,6 +45,11 @@ export const Pieces = {
     ROOK: "r",
     QUEEN: "q",
     KING: "k",
+};
+
+export const Colors = {
+    WHITE: "w",
+    BLACK: "b",
 };
 
 export const PieceValues = {
