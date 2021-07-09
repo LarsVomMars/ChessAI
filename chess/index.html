@@ -11,6 +11,12 @@
 </head>
 
 <body>
+    <div>
+        <button id="analyze">Analyze</button>
+        <label id="analyze-depth-label" for="analyze-depth">Depth: 5</label>
+        <input type="range" min="0" max="8" step="1" value="5" id="analyze-depth">
+        <p id="analyze-result"></p>
+    </div>
     <div id="board"></div>
     <script src="./node_modules/chess.js/chess.js"></script>
     <script type="module" src="./script.js"></script>
