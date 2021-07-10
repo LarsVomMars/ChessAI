@@ -21,20 +21,6 @@ const chess = new Chess(
 
 const search = new Search(chess);
 
-window.ai = search;
-window.chess = chess;
-window.checkEvalTime = () => {
-    const start = performance.now();
-    search.evaluator.evaluate();
-    return performance.now() - start;
-};
-window.bunchEval = () => {
-    let sum = 0;
-    for (let i = 0; i < 1000; i++) sum += checkEvalTime();
-
-    return sum / 1000;
-};
-
 const btn = document.getElementById("analyze");
 const slider = document.getElementById("analyze-depth");
 const show = document.getElementById("analyze-result");

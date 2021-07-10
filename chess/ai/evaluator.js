@@ -1,11 +1,4 @@
-import {
-    Colors,
-    countMaterial,
-    countMaterialOfType,
-    endgameWeight,
-    evaluateSquareTables,
-    Pieces,
-} from "./piece.js";
+import { Colors, evaluatePieceSquareTable, PieceValues } from "./piece.js";
 
 export default class Evaluator {
     constructor(chess) {
@@ -13,26 +6,36 @@ export default class Evaluator {
     }
 
     evaluate() {
-        // TODO: Reduce to one loop for efficiency
         const board = this.chess.board().flat();
-
         const perspective = this.chess.turn() === Colors.WHITE ? 1 : -1;
 
-        const white = countMaterial(board, Colors.WHITE);
-        const whiteWOPawns =
-            white - countMaterialOfType(board, Colors.WHITE, Pieces.PAWN);
-        const whiteEndgame = endgameWeight(whiteWOPawns);
+        let white = 0;
+        let whiteTables = 0;
 
-        const black = countMaterial(board, Colors.BLACK);
-        const blackWOPawns =
-            black - countMaterialOfType(board, Colors.BLACK, Pieces.PAWN);
-        const blackEndgame = endgameWeight(blackWOPawns);
+        let black = 0;
+        let blackTables = 0;
 
-        const whiteEval =
-            white + evaluateSquareTables(board, Colors.WHITE, whiteEndgame);
-        const blackEval =
-            black + evaluateSquareTables(board, Colors.BLACK, blackEndgame);
+        const positions = [];
 
-        return (whiteEval - blackEval) * perspective;
+        for (let i = 0; i < board.length; i++) {
+            const field = board[i];
+            if (!field) continue;
+
+            positions.push([field, i]);
+
+            const { type, color } = field;
+            const val = PieceValues[type];
+
+            if (color === Colors.WHITE) white += val;
+            else black += val;
+        }
+
+        for (const [piece, pos] of positions) {
+            if (piece.color === Colors.WHITE)
+                whiteTables += evaluatePieceSquareTable(piece, pos, white);
+            else blackTables += evaluatePieceSquareTable(piece, pos, black);
+        }
+
+        return (white + whiteTables - (black + blackTables)) * perspective;
     }
 }
