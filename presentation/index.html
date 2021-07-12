@@ -10,11 +10,13 @@
     <link rel="stylesheet" href="node_modules/reveal.js/dist/reset.css">
     <link rel="stylesheet" href="node_modules/reveal.js/dist/reveal.css">
 
-    <!-- <link rel="stylesheet" href="node_modules/reveal.js/dist/theme/white.css" id="theme"> -->
-    <link rel="stylesheet" href="node_modules/reveal.js/dist/theme/black.css" id="theme">
+    <link rel="stylesheet" href="node_modules/reveal.js/dist/theme/white.css" id="theme">
+    <!-- <link rel="stylesheet" href="node_modules/reveal.js/dist/theme/black.css" id="theme"> -->
 
-    <!-- <link rel="stylesheet" href="node_modules/highlight.js/styles/atom-one-light.css"> -->
-    <link rel="stylesheet" href="node_modules/highlight.js/styles/atom-one-dark-reasonable.css">
+    <link rel="stylesheet" href="node_modules/highlight.js/styles/atom-one-light.css">
+    <!-- <link rel="stylesheet" href="node_modules/highlight.js/styles/atom-one-dark-reasonable.css"> -->
+
+    <link rel="stylesheet" href="./custom.css">
 </head>
 
 <body>
@@ -22,8 +24,8 @@
         <div class="slides">
             <section>
                 <h1>Schach-Engines</h1>
-                <h5>Präsentationsprüfung Computertechnik</h3>
-                    <h6>Von Lars Krönner</h4>
+                <h5>Präsentationsprüfung Computertechnik</h5>
+                <h6>Von Lars Krönner</h6>
             </section>
 
             <section>
@@ -46,36 +48,394 @@
             </section>
 
             <section>
-                <h2>Grundlagen</h2>
-                <p>idk</p>
+                <section>
+                    <h2>Grundlagen MinMax</h2>
+                    <p class="fragment fade-in">Search-Tree</p>
+                    <p class="fragment fade-in">Depth-First-Search auf Tree</p>
+                    <p class="fragment fade-in">Terminale Node/Tiefe: Position evaluieren</p>
+                    <p class="fragment fade-in">Maximierender und minimierender Spieler</p>
+                    <p class="fragment fade-in">Suche nach besten Zügen</p>
+                </section>
+                <section>
+                    <img src="./assets/minmaxTree/BasicTree.png">
+                </section>
+                <section>
+                    <img src="./assets/minmaxTree/BTree.png">
+                </section>
+                <section>
+                    <img src="./assets/minmaxTree/ATree.png">
+                </section>
+                <section>
+                    <img src="./assets/minmaxTree/B2Tree.png">
+                </section>
+                <section>
+                    <img src="./assets/minmaxTree/A2Tree.png">
+                </section>
             </section>
 
             <section>
-                <h2>Minmax</h2>
+                <h2>Grundlagen Evaluationsfunktion</h2>
+                <p class="fragment fade-in">Centipawn Wert der Figuren</p>
+                <div class="fragment fade-in-then-out table-div">
+                    <table class="small-table">
+                        <tr>
+                            <th>Figur</th>
+                            <th>Centipawn Wert</th>
+                        </tr>
+                        <tr>
+                            <td>Bauer</td>
+                            <td>100</td>
+                        </tr>
+                        <tr>
+                            <td>Springer</td>
+                            <td>~320</td>
+                        </tr>
+                        <tr>
+                            <td>Läufer</td>
+                            <td>~330</td>
+                        </tr>
+                        <tr>
+                            <td>Turm</td>
+                            <td>500</td>
+                        </tr>
+                        <tr>
+                            <td>Dame</td>
+                            <td>~900</td>
+                        </tr>
+                        <tr>
+                            <td>König</td>
+                            <td>20000</td>
+                        </tr>
+                    </table>
+                </div>
+                <p class="fragment fade-in">Position der Figuren (Square Tables)</p>
+                <p class="fragment fade-in">Aus Sicht der zu ziehenden Seite</p>
+                <p class="fragment fade-in">eval = (eval<sub>weiß</sub> - eval<sub>schwarz</sub>) \( \times \)
+                    Perspektive</p>
+
+            </section>
+
+
+            <section>
+                <section>
+                    <h2>MinMax</h2>
+                    <pre><code data-line-numbers="|4-5|35|19|" class="language-cs">int MinMax(int depth)
+{
+    if (SideToMove() == WHITE) return Max(depth);
+    else return Min(depth);
+}
+
+int Max(int depth)
+{
+    int best = -INFINITY;
+    if (depth == 0) return Evaluate();
+
+    GenerateLegalMoves();
+    while (MovesLeft()) {
+        MakeNextMove();
+        int val = Min(depth - 1);
+        UnmakeMove();
+        best = Math.Max(best, val);
+    }
+    return best;
+}
+
+int Min(int depth)
+{
+    int best = INFINITY;
+    if (depth == 0) return Evaluate();
+
+    GenerateLegalMoves();
+    while (MovesLeft()) {
+        MakeNextMove();
+        int val = Max(depth - 1);
+        UnmakeMove();
+        best = Math.Min(best, val);
+    }
+    return best;
+}
+                    </code></pre>
+                </section>
+                <section>
+                    <h2>NegaMax</h2>
+                    <p class="fragment fade-in">$$ \text{Max}(a,b) = −\text{Min}(−a,−b)$$</p>
+                    <pre><code data-line-numbers class="fragment fade-in">int NegaMax(int depth)
+{
+    if (depth == 0) return Evaluate();
+    
+    int best = -INFINITY;
+
+    GenerateLegalMoves();
+    while (MovesLeft()) {
+        MakeNextMove();
+        int val = -NegaMax(depth - 1); // Note the minus sign here.
+        UnmakeMove();
+        best = Math.max(best, score)
+    }
+    return best;
+}                        
+                    </code></pre>
+                </section>
+                <section>
+                    <pre><code data-line-numbers class="language-js">search(depth = 4) {
+    if (depth > MAX_DEPTH) throw "TO DEEP!";
+
+    if (depth === 0) return this.evaluator.evaluate();
+
+    if (this.chess.game_over())
+        return this.chess.in_checkmate() ? -MATE_SCORE : 0;
+
+    let best = -Infinity;
+    for (const move of chess.moves()) {
+        this.chess.move(move);
+        const score = -this.search(depth - 1);
+        this.chess.undo(); 
+        best = Math.max(best, score);
+    }
+    
+    return best;
+}
+                    </code></pre>
+                </section>
             </section>
 
             <section>
-                <h2>Problem</h2>
-                <table>
-                    <tr>
-                        <th>Plys</th>
-                        <th>Mögliche Positionen</th>
-                    </tr>
-                    <tr>
-                        <td>1</td>
-                        <td>20</td>
-                    </tr>
-                    <tr>
-                        <td>2</td>
-                        <td>400</td>
-                    </tr>
+                <section>
+                    <h2>Probleme</h2>
+                    <p class="fragment fade-in">Branching-Factor \( \approx 35 \)</p>
+                    <p class="fragment fade-in">\( \Rightarrow \) Search-Tree sehr tief und breit</p>
+                </section>
+                <section>
+                    <small>Aus Startposition</small>
+                    <table class="fragment fade-in">
+                        <tr>
+                            <th>Plies</th>
+                            <th>Mögliche Positionen</th>
+                        </tr>
+                        <tr>
+                            <td>1</td>
+                            <td>20</td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>400</td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td>8,902</td>
+                        </tr>
+                        <tr>
+                            <td>4</td>
+                            <td>197,281</td>
+                        </tr>
+                        <tr>
+                            <td>5</td>
+                            <td>4,865,609</td>
+                        </tr>
+                        <tr>
+                            <td>6</td>
+                            <td>119,060,324</td>
+                        </tr>
+                    </table>
+                </section>
+                <section>
+                    <h3>Shannon Number</h3>
+                    <p class="fragment fade-in">\( \sim10^{50} \) mögliche Positionen</p>
+                    <p class="fragment fade-in">Maximal \( 5\times10^{52} \) Positionen</p>
+                    <p class="fragment fade-in">\( \Rightarrow \) Schach kann nicht einfach gelöst werden</p>
+                </section>
+            </section>
 
-                    <p>Faktor ~35</p>
-                </table>
+            <section>
+                <h2>Verbesserungen</h2>
+            </section>
+
+            <section>
+                <section>
+                    <h3>Alpha-Beta-Pruning</h3>
+                    <p class="fragment fade-in">Überspringen von schlechten Ästen im Search-Tree</p>
+                </section>
+                <section>
+                    <img src="./assets/abTree/BasicTree.png">
+                </section>
+                <section>
+                    <img src="./assets/abTree/BTree.png">
+                </section>
+                <section>
+                    <img src="./assets/abTree/SkipTree.png">
+                </section>
+                <section>
+                    <pre><code class="language-js">search(depth = 4, plys = 0, alpha = -Infinity, beta = Infinity) {
+    if (depth === 0) return this.evaluator.evaluate();
+
+    if (plys > 0) {
+        // Return if better mate was already found
+        alpha = Math.max(alpha, -MATE_SCORE + plys);
+        beta = Math.min(beta, MATE_SCORE - plys);
+        if (alpha >= beta) return alpha;
+    }
+
+    if (this.chess.game_over())
+        return this.chess.in_checkmate() ? -MATE_SCORE + plys : 0;
+
+    for (const move of chess.moves()) {
+        this.chess.move(move);
+        const score = -this.search(depth - 1, plys + 1, -beta, -alpha);
+        this.chess.undo();
+
+        if (score >= beta) return beta;
+
+        alpha = Math.max(alpha, score);
+    }                    
+    return alpha;
+}
+                    </code></pre>
+                </section>
+                <section>
+                    <h3>Problem</h3>
+                    <p class="fragment fade-in">Abhängig von Sortierung der Züge</p>
+                </section>
+            </section>
+
+            <section>
+                <section>
+                    <h3>Move Ordering</h3>
+                    <p class="fragment fade-in">Alpha-Beta-Pruning effizienter machen</p>
+                    <p class="fragment fade-in">Mapping: Wert zu Zug</p>
+                    <p class="fragment fade-in">Bspw.: Wert der geschlagenen Figur</p>
+                    <p class="fragment fade-in">Sortieren nach Wert (hoch -> tief)</p>
+                </section>
+
+                <section>
+                    <pre><code data-line-numbers class="language-js">function orderMoves(chess, onlyCaptures) {
+        let moves = chess
+            .moves({ verbose: true })
+            .filter((m) => !onlyCaptures || (m.flag && m.flag.includes("c")));
+
+    for (const move of moves) {
+        let score = 0;
+        const movePiece = move.piece;
+        const capturePiece = chess.get(move.to);
+
+        if (capturePiece)
+            score += 10 * PieceValues[capturePiece] - PieceValues[movePiece];
+
+        if (move.flag && move.flag.includes("p"))
+            score += PieceValues[move.promotion];
+
+        move.score = score;
+    }
+
+    return moves.sort((a, b) => b.score - a.score);
+}
+                    </code></pre>
+                </section>
+            </section>
+
+            <section>
+                <section>
+                    <h3>Transposition Table</h3>
+                    <div class="custom-flex-gif">
+                        <img src="./assets/gifs/board1.gif">
+                        <img src="./assets/gifs/board2.gif">
+                    </div>
+                </section>
+                <section>
+                    <p class="fragment fade-in">Speichern von bereits evaluierten Positionen</p>
+                    <p class="fragment fade-in">Mapping: Position auf Evaluation</p>
+                    <p class="fragment fade-in">Position als Zobrist-Hash (64Bit Int)</p>
+                </section>
+            </section>
+
+            <section>
+                <h2>Vergleich</h2>
+                <section>
+                    <img src="./assets/chesspos.png" width="40%"><br>
+                    <small>Tiefe: 5 Plies</small>
+                </section>
+                <section>
+                    <table>
+                        <tr>
+                            <th>Methode</th>
+                            <th>Evaluierte Positionen</th>
+                        </tr>
+                        <tr>
+                            <td>Negamax</td>
+                            <td>1006387</td>
+                        </tr>
+                        <tr>
+                            <td>Alpha-Beta-Pruning</td>
+                            <td>48858</td>
+                        </tr>
+                        <tr>
+                            <td>Transposition Table</td>
+                            <td>41784</td>
+                        </tr>
+                    </table>
+                </section>
+            </section>
+
+            <section>
+                <section>
+                    <h3>Quiescent Search</h3>
+                    <p class="fragment fade-in">MinMax hört bei depth = 0 auf</p>
+                    <p class="fragment fade-in">Sucht bis zu einer ruhigen Position</p>
+                </section>
+                <section>
+                    <pre><code class="language-js">quiescentSearch(alpha, beta) {
+    const initScore = this.evaluator.evaluate();
+    if (initScore >= beta) return beta;
+    alpha = Math.max(alpha, initScore);
+
+    const moves = orderMoves(this.chess, true);
+    for (const move of moves) {
+        this.chess.move(move);
+        const score = -this.quiescentSearch(-beta, -alpha);
+        this.chess.undo();
+        if (score >= beta) return beta;
+        alpha = Math.max(alpha, score);
+    }
+    return alpha;
+}
+                    </code></pre>
+                </section>
+            </section>
+
+            <section>
+                <section>
+                    <h3>Endgame Tablebase</h3>
+                    <p class="fragment fade-in">Alle Positionen mit \( \leq 7 \) Figuren sind gelöst</p>
+                    <p class="fragment fade-in">Position suchen und besten Zug spielen</p>
+                </section>
+            </section>
+
+            <section>
+                <h2>Fazit</h2>
+            </section>
+
+            <section>
+                <h2>Quellen</h2>
+                <div class="links">
+                    <a href="https://www.chessprogramming.org/Main_Page">https://chessprogramming.org</a><br>
+                    <a
+                        href="https://web.archive.org/web/20071026090003/http://www.brucemo.com/compchess/programming/index.htm">https://web.archive.org/web/20071026090003/http://www.brucemo.com/compchess/programming/index.htm</a><br>
+                    <a href="https://github.com/SebLague/Chess-AI">https://github.com/SebLague/Chess-AI</a>
+                </div>
+            </section>
+
+            <section>
+                <h3>Spiel 1</h3>
+                <img src="./assets/gifs/GAME1.gif" height="500px">
+            </section>
+
+            <section>
+                <h3>Spiel 2</h3>
+                <img src="./assets/gifs/GAME2.gif" height="500px">
             </section>
         </div>
     </div>
 
+    <script src="./main.js"></script>
     <script src="node_modules/reveal.js/dist/reveal.js"></script>
     <script src="node_modules/reveal.js/plugin/zoom/zoom.js"></script>
     <script src="node_modules/reveal.js/plugin/notes/notes.js"></script>
@@ -89,7 +449,7 @@
             hash: true,
 
             math: {
-                mathjax: 'node_modules/mathjax/MathJax.js',
+                mathjax: './node_modules/mathjax/es5/tex-svg-full.js',
                 config: 'TeX-AMS_HTML-full',
             },
 

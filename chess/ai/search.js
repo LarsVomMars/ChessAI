@@ -1,12 +1,22 @@
 import Evaluator from "./evaluator.js";
 import orderMoves from "./moveordering.js";
-import TranspositionTable, { TYPE_EXACT, TYPE_LOWER, TYPE_UPPER } from "./transposition.js";
+import TranspositionTable, {
+    TYPE_EXACT,
+    TYPE_LOWER,
+    TYPE_UPPER,
+} from "./transposition.js";
 
 export default class Search {
     constructor(chess) {
         this.chess = chess;
         this.evaluator = new Evaluator(chess);
         this.table = new TranspositionTable(chess, 64e3);
+        this.bestMove = undefined;
+        this.bestEval = 0;
+    }
+
+    get data() {
+        return [this.bestEval, this.bestMove];
     }
 
     search(depth = 4, plys = 0, alpha = -Infinity, beta = Infinity) {
@@ -21,14 +31,13 @@ export default class Search {
         const ttScore = this.table.lookup(depth, plys, alpha, beta);
         if (ttScore !== null) return ttScore;
 
-        if (depth === 0) {
-            return this.quiescentSearch(alpha, beta);
-        }
+        if (depth === 0) return this.quiescentSearch(alpha, beta);
+
         if (this.chess.game_over())
             return this.chess.in_checkmate() ? -MATE_SCORE + plys : 0;
 
         let type = TYPE_UPPER;
-        let best = -Infinity;
+        let best;
 
         const moves = orderMoves(this.chess, false);
         for (const move of moves) {
@@ -45,6 +54,10 @@ export default class Search {
                 alpha = score;
                 type = TYPE_EXACT;
                 best = move;
+                if (plys === 0) {
+                    this.bestMove = move;
+                    this.bestEval = score;
+                }
             }
         }
 
