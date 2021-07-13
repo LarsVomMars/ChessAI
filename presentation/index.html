@@ -26,6 +26,9 @@
                 <h1>Schach-Engines</h1>
                 <h5>Präsentationsprüfung Computertechnik</h5>
                 <h6>Von Lars Krönner</h6>
+                <aside class="notes">
+                    Seit IBM's DeepBlue Kasparov in 1997 schlug, ...
+                </aside>
             </section>
 
             <section>
@@ -119,7 +122,7 @@
             <section>
                 <section>
                     <h2>MinMax</h2>
-                    <pre><code data-line-numbers="|4-5|35|19|" class="language-cs">int MinMax(int depth)
+                    <pre><code data-line-numbers="|1-5|7-20|22-37|" class="language-cs">int MinMax(int depth)
 {
     if (SideToMove() == WHITE) return Max(depth);
     else return Min(depth);
@@ -168,13 +171,17 @@ int Min(int depth)
     GenerateLegalMoves();
     while (MovesLeft()) {
         MakeNextMove();
-        int val = -NegaMax(depth - 1); // Note the minus sign here.
+        int val = -NegaMax(depth - 1);
         UnmakeMove();
         best = Math.max(best, score)
     }
     return best;
 }                        
                     </code></pre>
+                    <aside class="notes">
+                        Heißt: -A = B
+                        Da guter Zug A => schlechter Zug B
+                    </aside>
                 </section>
                 <section>
                     <pre><code data-line-numbers class="language-js">search(depth = 4) {
@@ -202,6 +209,7 @@ int Min(int depth)
             <section>
                 <section>
                     <h2>Probleme</h2>
+                    <p class="fragment fade-in">Sehr langsam</p>
                     <p class="fragment fade-in">Branching-Factor \( \approx 35 \)</p>
                     <p class="fragment fade-in">\( \Rightarrow \) Search-Tree sehr tief und breit</p>
                 </section>
@@ -243,6 +251,10 @@ int Min(int depth)
                     <p class="fragment fade-in">\( \sim10^{50} \) mögliche Positionen</p>
                     <p class="fragment fade-in">Maximal \( 5\times10^{52} \) Positionen</p>
                     <p class="fragment fade-in">\( \Rightarrow \) Schach kann nicht einfach gelöst werden</p>
+                    <aside class="notes">
+                        US Mathematiker Claude Shannon
+                        $$ 10^{120} \text{mögliche Spiele} $$
+                    </aside>
                 </section>
             </section>
 
@@ -265,7 +277,7 @@ int Min(int depth)
                     <img src="./assets/abTree/SkipTree.png">
                 </section>
                 <section>
-                    <pre><code class="language-js">search(depth = 4, plys = 0, alpha = -Infinity, beta = Infinity) {
+                    <pre><code class="language-js" data-line-numbers>search(depth = 4, plys = 0, alpha = -Infinity, beta = Infinity) {
     if (depth === 0) return this.evaluator.evaluate();
 
     if (plys > 0) {
@@ -308,9 +320,9 @@ int Min(int depth)
 
                 <section>
                     <pre><code data-line-numbers class="language-js">function orderMoves(chess, onlyCaptures) {
-        let moves = chess
-            .moves({ verbose: true })
-            .filter((m) => !onlyCaptures || (m.flag && m.flag.includes("c")));
+    let moves = chess
+        .moves({ verbose: true })
+        .filter((m) => !onlyCaptures || (m.flag && m.flag.includes("c")));
 
     for (const move of moves) {
         let score = 0;
@@ -382,7 +394,7 @@ int Min(int depth)
                     <p class="fragment fade-in">Sucht bis zu einer ruhigen Position</p>
                 </section>
                 <section>
-                    <pre><code class="language-js">quiescentSearch(alpha, beta) {
+                    <pre><code class="language-js" data-line-numbers>quiescentSearch(alpha, beta) {
     const initScore = this.evaluator.evaluate();
     if (initScore >= beta) return beta;
     alpha = Math.max(alpha, initScore);
@@ -411,6 +423,11 @@ int Min(int depth)
 
             <section>
                 <h2>Fazit</h2>
+                <aside class="notes">
+                    Seit DeepBlue in 1997
+                    Stockfish14 vor ~2Wochen
+                    AlphaZero und Lc0; Stockfish NNUE
+                </aside>
             </section>
 
             <section>
